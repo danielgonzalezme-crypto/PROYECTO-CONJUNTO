@@ -5,7 +5,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 
-const BASE = __ENV.BASE_URL || 'http://127.0.0.1:8081';
+const BASE = __ENV.BASE_URL || 'http://127.0.0.1:8080';
 const API = `${BASE}/api/residentes`;
 const TOTAL = 1000;
 const PREFIJO = '777';

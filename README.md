@@ -6,7 +6,7 @@ Sistema de gestión de un conjunto residencial, hecho con dos aplicaciones que s
 - **admin-web** (PHP + Laravel): interfaz web y administración de empleados sobre su propia base MySQL (`administrativo_db`). Consume la API de residentes para armar el dashboard por torre.
 
 ```
-Navegador ──► admin-web (Laravel :8000) ──HTTP──► residentes-api (Spring :8080 dentro de Docker, :8081 en el equipo)
+Navegador ──► admin-web (Laravel :8000) ──HTTP──► residentes-api (Spring :8080)
                      │                                    │
               administrativo_db                     residentes_db
                   (MySQL)                              (MySQL)
@@ -115,7 +115,7 @@ conjuntosmart/
 
 ## Problemas frecuentes
 
-- **Puerto 8000 u 8081 ocupado:** cierra cualquier Spring o `php artisan serve` que tengas corriendo fuera de Docker. (La API se publica en el 8081 del equipo porque el 8080 lo usa otro programa.)
+- **Puerto 8000 u 8080 ocupado:** cierra cualquier Spring o `php artisan serve` que tengas corriendo fuera de Docker. Si el 8080 lo usa otro programa que no puedes cerrar, pon `API_PORT=8081` (u otro libre) en tu `.env` y ejecuta `docker compose up -d`; el script de datos de demostración toma ese puerto solo.
 - **El dashboard muestra el aviso rojo:** Spring aún está arrancando; espera unos segundos y recarga.
 - **Cambié una contraseña en `.env` y no se aplicó:** las bases ya existen con la contraseña anterior. Solo se puede aplicar con `docker compose down -v`, que borra los datos.
 

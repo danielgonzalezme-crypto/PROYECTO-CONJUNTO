@@ -65,6 +65,6 @@ class LoginController extends Controller
 
     private function claveIntentos(Request $request): string
     {
-        return Str::transliterate(Str::lower($request->input('email')) . '|' . $request->ip());
+        return Str::transliterate(Str::lower($request->input('email')).'|'.$request->ip());
     }
 }

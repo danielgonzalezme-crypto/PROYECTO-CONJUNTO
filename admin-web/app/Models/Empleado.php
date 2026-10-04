@@ -12,6 +12,7 @@ class Empleado extends Model
     use HasFactory;
 
     public const CARGOS = ['Vigilante', 'Aseador', 'Mantenimiento', 'Administrativo'];
+
     public const TURNOS = ['Mañana', 'Tarde', 'Noche'];
 
     protected $fillable = [

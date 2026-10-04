@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     public const ADMIN_EMAIL = 'admin@conjuntosmart.test';
+
     public const ADMIN_PASSWORD = 'Admin12345';
 
     /**

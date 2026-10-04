@@ -1,0 +1,12 @@
+# Análisis estático de PHP con PHPStan + Larastan (reglas de Laravel).
+# Ejecutar: vendor/bin/phpstan analyse
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - routes/
+        - database/
+    # Nivel de exigencia de 0 a 10. El 6 revisa tipos de parámetros, retornos y propiedades.
+    level: 6

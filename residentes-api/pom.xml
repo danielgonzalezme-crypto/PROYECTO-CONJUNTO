@@ -77,6 +77,21 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<!-- Análisis estático: code smells (PMD) y código duplicado (CPD).
+			     mvn pmd:check pmd:cpd-check  -> falla si hay hallazgos -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>3.28.0</version>
+				<configuration>
+					<rulesets>
+						<ruleset>/rulesets/java/quickstart.xml</ruleset>
+					</rulesets>
+					<minimumTokens>50</minimumTokens>
+					<printFailingErrors>true</printFailingErrors>
+					<linkXRef>false</linkXRef>
+				</configuration>
+			</plugin>
 			<!-- Cobertura de pruebas: el reporte queda en target/site/jacoco/index.html -->
 			<plugin>
 				<groupId>org.jacoco</groupId>

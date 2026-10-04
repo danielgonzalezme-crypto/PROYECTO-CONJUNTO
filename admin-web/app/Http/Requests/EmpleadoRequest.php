@@ -13,6 +13,9 @@ class EmpleadoRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, array<int, mixed>>
+     */
     public function rules(): array
     {
         return [
@@ -27,7 +30,8 @@ class EmpleadoRequest extends FormRequest
             'activo' => ['nullable', 'boolean'],
         ];
     }
-        public function attributes(): array
+
+    public function attributes(): array
     {
         return [
             'cedula' => 'cédula',

@@ -10,8 +10,7 @@ class SpringResidentesApi implements ResidentesApi
     public function __construct(
         private readonly string $baseUrl,
         private readonly int $timeout,
-    ) {
-    }
+    ) {}
 
     public function listar(?string $torre = null): array
     {
@@ -23,6 +22,10 @@ class SpringResidentesApi implements ResidentesApi
         return $this->get('/api/residentes/morosos');
     }
 
+    /**
+     * @param  array<string, string>  $consulta
+     * @return array<int, array<string, mixed>>
+     */
     private function get(string $ruta, array $consulta = []): array
     {
         try {
@@ -38,7 +41,7 @@ class SpringResidentesApi implements ResidentesApi
 
         if ($respuesta->failed()) {
             throw new ResidentesApiNoDisponible(
-                'La API de residentes respondió con error ' . $respuesta->status() . '.'
+                'La API de residentes respondió con error '.$respuesta->status().'.'
             );
         }
 

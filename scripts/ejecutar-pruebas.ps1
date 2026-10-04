@@ -19,17 +19,17 @@ $resumen = [ordered]@{}
 
 function Paso($titulo) { Write-Host "`n=== $titulo ===" -ForegroundColor Cyan }
 
-Paso '1/4 Pruebas unitarias y de integración de la API (JUnit + JaCoCo, Java 21)'
+Paso '1/4 API: pruebas JUnit + JaCoCo y análisis estático PMD/CPD (Java 21)'
 docker run --rm -v "${raiz}\residentes-api:/app" -v conjuntosmart_m2:/root/.m2 -w /app `
-    maven:3.9-eclipse-temurin-21 mvn -B verify 2>&1 | Tee-Object "$resultados\junit-salida.txt" |
-    Select-String 'Tests run:|BUILD'
-$resumen['JUnit (API)'] = $LASTEXITCODE -eq 0
+    maven:3.9-eclipse-temurin-21 mvn -B verify pmd:check pmd:cpd-check 2>&1 | Tee-Object "$resultados\junit-salida.txt" |
+    Select-String 'Tests run:|PMD Failure|CPD Failure|BUILD'
+$resumen['JUnit + PMD (API)'] = $LASTEXITCODE -eq 0
 
-Paso '2/4 Pruebas de Laravel (PHPUnit + cobertura con PCOV)'
+Paso '2/4 Web: Pint, PHPStan y PHPUnit con cobertura (PCOV)'
 docker run --rm -v "${raiz}\admin-web:/app" -w /app php:8.4-cli sh -c `
-    'apt-get update -qq >/dev/null && apt-get install -y -qq $PHPIZE_DEPS >/dev/null 2>&1 && pecl install pcov >/dev/null 2>&1 && docker-php-ext-enable pcov >/dev/null && php vendor/bin/phpunit --testdox --coverage-text --coverage-html storage/coverage-html --coverage-clover storage/coverage.xml --colors=never' 2>&1 |
-    Tee-Object "$resultados\phpunit-salida.txt" | Select-String 'OK \(|FAILURES|Tests:|Lines:'
-$resumen['PHPUnit (web)'] = $LASTEXITCODE -eq 0
+    'apt-get update -qq >/dev/null && apt-get install -y -qq $PHPIZE_DEPS >/dev/null 2>&1 && pecl install pcov >/dev/null 2>&1 && docker-php-ext-enable pcov >/dev/null && php vendor/bin/pint --test && php vendor/bin/phpstan analyse --no-progress --memory-limit=1G && php vendor/bin/phpunit --testdox --coverage-text --coverage-html storage/coverage-html --coverage-clover storage/coverage.xml --colors=never' 2>&1 |
+    Tee-Object "$resultados\phpunit-salida.txt" | Select-String 'PASS|FAIL|No errors|Found \d+ error|OK \(|FAILURES|Tests:|Lines:'
+$resumen['Pint+PHPStan+PHPUnit'] = $LASTEXITCODE -eq 0
 
 Paso '3/4 Pruebas funcionales de la API con Postman (Newman)'
 docker run --rm --network $red -v "${raiz}\pruebas:/etc/newman" postman/newman:6-alpine run `

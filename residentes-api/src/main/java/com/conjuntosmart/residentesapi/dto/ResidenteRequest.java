@@ -13,7 +13,7 @@ public record ResidenteRequest(
         @NotNull @PositiveOrZero BigDecimal deudaActual,
         Boolean tieneParqueadero) {
 
-    /** Si el campo no se envía se asume que no tiene parqueadero, igual que una casilla sin marcar. */
+    // Si el campo no se envía se asume que no tiene parqueadero, igual que una casilla sin marcar.
     public ResidenteRequest {
         tieneParqueadero = Boolean.TRUE.equals(tieneParqueadero);
     }

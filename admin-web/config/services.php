@@ -34,7 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-        'residentes' => [
+    'residentes' => [
         'url' => env('RESIDENTES_API_URL', 'http://127.0.0.1:8080'),
         'timeout' => env('RESIDENTES_API_TIMEOUT', 5),
     ],
