@@ -1,0 +1,12 @@
+.env
+.env.*
+.git
+.vscode
+vendor
+node_modules
+database/database.sqlite
+bootstrap/cache/*.php
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*

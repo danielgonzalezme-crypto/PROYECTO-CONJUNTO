@@ -1,0 +1,88 @@
+name: conjuntosmart
+
+services:
+  residentes-db:
+    image: mysql:8.0
+    container_name: residentes-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${RESIDENTES_DB_ROOT_PASSWORD:?Falta RESIDENTES_DB_ROOT_PASSWORD en el archivo .env}
+      MYSQL_DATABASE: residentes_db
+      MYSQL_USER: residentes_user
+      MYSQL_PASSWORD: ${RESIDENTES_DB_PASSWORD:?Falta RESIDENTES_DB_PASSWORD en el archivo .env}
+    ports:
+      # Solo accesible desde este equipo (útil para herramientas de BD). Se puede borrar.
+      - "127.0.0.1:3308:3306"
+    volumes:
+      - residentes_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  administrativo-db:
+    image: mysql:8.0
+    container_name: administrativo-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${ADMIN_DB_ROOT_PASSWORD:?Falta ADMIN_DB_ROOT_PASSWORD en el archivo .env}
+      MYSQL_DATABASE: administrativo_db
+      MYSQL_USER: admin_user
+      MYSQL_PASSWORD: ${ADMIN_DB_PASSWORD:?Falta ADMIN_DB_PASSWORD en el archivo .env}
+    ports:
+      - "127.0.0.1:3309:3306"
+    volumes:
+      - administrativo_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  residentes-api:
+    build: ./residentes-api
+    restart: unless-stopped
+    depends_on:
+      residentes-db:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://residentes-db:3306/residentes_db?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: residentes_user
+      SPRING_DATASOURCE_PASSWORD: ${RESIDENTES_DB_PASSWORD}
+      # Dentro del contenedor debe escuchar en todas las interfaces; el acceso desde fuera
+      # lo limita el mapeo de puertos (solo 127.0.0.1).
+      SERVER_ADDRESS: 0.0.0.0
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  admin-web:
+    build: ./admin-web
+    restart: unless-stopped
+    depends_on:
+      administrativo-db:
+        condition: service_healthy
+      residentes-api:
+        condition: service_started
+    environment:
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_URL: http://127.0.0.1:8000
+      APP_KEY: ${APP_KEY:-}
+      DB_CONNECTION: mysql
+      DB_HOST: administrativo-db
+      DB_PORT: "3306"
+      DB_DATABASE: administrativo_db
+      DB_USERNAME: admin_user
+      DB_PASSWORD: ${ADMIN_DB_PASSWORD}
+      SESSION_DRIVER: database
+      CACHE_STORE: database
+      QUEUE_CONNECTION: database
+      RESIDENTES_API_URL: http://residentes-api:8080
+      RESIDENTES_API_TIMEOUT: "5"
+    ports:
+      - "127.0.0.1:8000:8000"
+
+volumes:
+  residentes_data:
+  administrativo_data:
