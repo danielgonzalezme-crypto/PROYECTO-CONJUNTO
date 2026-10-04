@@ -17,8 +17,8 @@ jobs:
       run:
         working-directory: residentes-api
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -27,7 +27,7 @@ jobs:
         run: mvn -B verify pmd:check pmd:cpd-check
       - name: Guardar reporte de cobertura
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cobertura-api-jacoco
           path: residentes-api/target/site/jacoco/
@@ -39,7 +39,7 @@ jobs:
       run:
         working-directory: admin-web
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
@@ -57,7 +57,7 @@ jobs:
           vendor/bin/phpunit --coverage-text --coverage-html cobertura-web
       - name: Guardar reporte de cobertura
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cobertura-web-phpunit
           path: admin-web/cobertura-web/
@@ -67,7 +67,7 @@ jobs:
     needs: [api, web]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Crear .env con contraseñas aleatorias
         run: |
           {
