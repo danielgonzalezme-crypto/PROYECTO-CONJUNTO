@@ -100,3 +100,8 @@ conjuntosmart/
 - **Puerto 8000 u 8080 ocupado:** cierra cualquier Spring o `php artisan serve` que tengas corriendo fuera de Docker.
 - **El dashboard muestra el aviso rojo:** Spring aún está arrancando; espera unos segundos y recarga.
 - **Cambié una contraseña en `.env` y no se aplicó:** las bases ya existen con la contraseña anterior. Solo se puede aplicar con `docker compose down -v`, que borra los datos.
+
+## Autores
+Daniel Estiben Gonzalez Medina
+Diego Jose Sandoval de la pava
+María Sofía Campos 
