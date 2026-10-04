@@ -11,5 +11,10 @@ public record ResidenteRequest(
         @NotBlank String torre,
         @NotBlank String apartamento,
         @NotNull @PositiveOrZero BigDecimal deudaActual,
-        boolean tieneParqueadero) {
+        Boolean tieneParqueadero) {
+
+    /** Si el campo no se envía se asume que no tiene parqueadero, igual que una casilla sin marcar. */
+    public ResidenteRequest {
+        tieneParqueadero = Boolean.TRUE.equals(tieneParqueadero);
+    }
 }

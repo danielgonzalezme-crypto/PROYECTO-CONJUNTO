@@ -10,4 +10,7 @@ fi
 # Crea o actualiza las tablas en administrativo_db
 php artisan migrate --force
 
+# Crea el usuario administrador de demostración si aún no existe
+php artisan db:seed --force
+
 exec php artisan serve --host=0.0.0.0 --port=8000

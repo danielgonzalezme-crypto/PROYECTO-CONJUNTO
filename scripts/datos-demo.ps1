@@ -1,7 +1,7 @@
-# Crea residentes FICTICIOS en la API de Spring (http://127.0.0.1:8080).
+# Crea residentes FICTICIOS en la API de Spring (http://127.0.0.1:8081).
 # Uso:  powershell -ExecutionPolicy Bypass -File .\scripts\datos-demo.ps1
 
-$url = "http://127.0.0.1:8080/api/residentes"
+$url = "http://127.0.0.1:8081/api/residentes"
 
 $residentes = @(
     @{ cedula = "1000000001"; nombre = "Ana Torres (demo)";    torre = "A"; apartamento = "101"; deudaActual = 150000; tieneParqueadero = $true  },

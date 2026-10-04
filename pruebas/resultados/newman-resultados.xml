@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="ConjuntoSmart - API de residentes" tests="13" time="0.185">
+  <testsuite name="00 - Limpieza previa (borra el residente de prueba si quedó de otra ejecución)" id="d45f8889-a684-4979-9016-38f95e5d9699" timestamp="2026-10-04T21:01:06.682Z" tests="2" failures="0" errors="0" time="0.069">
+    <testcase name="Responde en menos de 1 segundo" time="0.069" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 204 o 404" time="0.069" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-01 - Crear residente con datos válidos" id="5980b23b-aad3-4cd0-82c2-28d2f9791f7a" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.020">
+    <testcase name="Responde en menos de 1 segundo" time="0.020" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 201 Created" time="0.020" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Devuelve el residente con id" time="0.020" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-02 - Crear residente con cédula duplicada" id="21ac428d-e923-442f-a7dd-a8fd9c56b375" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.008">
+    <testcase name="Responde en menos de 1 segundo" time="0.008" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 409 Conflict" time="0.008" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Explica que la cédula ya existe" time="0.008" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-03 - Crear residente con campos obligatorios vacíos" id="6baaa9c0-98d2-43f0-9aca-7100aa76d07a" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.006">
+    <testcase name="Responde en menos de 1 segundo" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 400 Bad Request" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Lista los 5 campos con error" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-04 - Enviar un JSON mal formado" id="1c64263f-651b-4ea7-9878-2da07c7316fb" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.007">
+    <testcase name="Responde en menos de 1 segundo" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 400 Bad Request" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Explica el problema" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-05 - Consultar residente por cédula" id="64b79567-3e30-45e0-8d35-a0b1e2ca0ea2" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.006">
+    <testcase name="Responde en menos de 1 segundo" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 200 OK" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Devuelve los datos guardados" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-06 - Listar residentes filtrando por torre" id="48ecf0f5-1346-4a1c-9ff5-86227efd98c0" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.006">
+    <testcase name="Responde en menos de 1 segundo" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 200 OK" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Todos los resultados son de la torre Z" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-07 - Listar morosos incluye al residente con deuda" id="19b95cc0-9540-4975-8984-0f82ff8cc64d" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.007">
+    <testcase name="Responde en menos de 1 segundo" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 200 OK" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Todos tienen deuda mayor a 0 e incluye al de prueba" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-08 - Actualizar residente (paga la deuda)" id="be00c0b2-4bad-4326-9313-0a8cfbd410af" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.018">
+    <testcase name="Responde en menos de 1 segundo" time="0.018" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 200 OK" time="0.018" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Guarda los cambios" time="0.018" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-09 - Tras pagar ya no aparece en morosos" id="bfe3649d-4d01-4926-8196-59669ce660b8" timestamp="2026-10-04T21:01:06.682Z" tests="2" failures="0" errors="0" time="0.006">
+    <testcase name="Responde en menos de 1 segundo" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="No incluye al residente de prueba" time="0.006" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-10 - Eliminar residente" id="8f234441-a358-412e-9b7c-2dae1de315ac" timestamp="2026-10-04T21:01:06.682Z" tests="2" failures="0" errors="0" time="0.018">
+    <testcase name="Responde en menos de 1 segundo" time="0.018" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 204 No Content" time="0.018" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-11 - Consultar un residente eliminado" id="1b25e634-faec-40d0-8e8d-ab59e8e35bca" timestamp="2026-10-04T21:01:06.682Z" tests="3" failures="0" errors="0" time="0.007">
+    <testcase name="Responde en menos de 1 segundo" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 404 Not Found" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Explica que no existe" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+  <testsuite name="CP-12 - Eliminar un residente que no existe" id="58e68d04-e4a8-4545-9dc1-d3ba7f05a36e" timestamp="2026-10-04T21:01:06.682Z" tests="2" failures="0" errors="0" time="0.007">
+    <testcase name="Responde en menos de 1 segundo" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+    <testcase name="Responde 404 Not Found" time="0.007" classname="ConjuntoSmartApiDeResidentes"/>
+  </testsuite>
+</testsuites>
