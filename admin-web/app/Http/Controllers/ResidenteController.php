@@ -2,28 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Services\Residentes\ResidentesApi;
-use App\Services\Residentes\ResidentesApiNoDisponible;
+use App\Services\Residentes\ConsultaResidentes;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class ResidenteController extends Controller
 {
-    public function __construct(private readonly ResidentesApi $residentes)
-    {
-    }
+    public function __construct(private readonly ConsultaResidentes $consulta) {}
 
     public function index(Request $request): View
     {
         $torre = $request->query('torre');
-        $error = null;
-
-        try {
-            $lista = $this->residentes->listar($torre);
-        } catch (ResidentesApiNoDisponible $e) {
-            $lista = [];
-            $error = $e->getMessage();
-        }
+        ['residentes' => $lista, 'error' => $error] = $this->consulta->listar($torre);
 
         return view('residentes.index', compact('lista', 'torre', 'error'));
     }

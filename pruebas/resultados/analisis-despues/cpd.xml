@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd-cpd xmlns="https://pmd-code.org/schema/cpd-report"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         pmdVersion="7.17.0"
+         timestamp="2026-10-04T21:20:42.185997716Z"
+         version="1.0.0"
+         xsi:schemaLocation="https://pmd-code.org/schema/cpd-report https://pmd.github.io/schema/cpd-report_1_0_0.xsd">
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/ResidentesApiApplication.java"
+         totalNumberOfTokens="34"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/controller/ResidenteController.java"
+         totalNumberOfTokens="204"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/dto/ResidenteRequest.java"
+         totalNumberOfTokens="50"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/dto/ResidenteResponse.java"
+         totalNumberOfTokens="27"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/exception/CedulaDuplicadaException.java"
+         totalNumberOfTokens="21"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/exception/GlobalExceptionHandler.java"
+         totalNumberOfTokens="180"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/exception/ResidenteNotFoundException.java"
+         totalNumberOfTokens="21"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/mapper/ResidenteMapper.java"
+         totalNumberOfTokens="158"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/model/Residente.java"
+         totalNumberOfTokens="241"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/repository/ResidenteRepository.java"
+         totalNumberOfTokens="45"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/service/ResidenteService.java"
+         totalNumberOfTokens="48"/>
+   <file path="/app/src/main/java/com/conjuntosmart/residentesapi/service/ResidenteServiceImpl.java"
+         totalNumberOfTokens="362"/>
+</pmd-cpd>

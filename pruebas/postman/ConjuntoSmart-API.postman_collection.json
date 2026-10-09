@@ -1,0 +1,185 @@
+{
+  "info": {
+    "name": "ConjuntoSmart - API de residentes",
+    "description": "Pruebas funcionales de la API de residentes (Spring Boot). Se ejecutan en orden: crean un residente de prueba en la torre Z, lo consultan, actualizan y eliminan. Importar en Postman o ejecutar con Newman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://127.0.0.1:8080" },
+    { "key": "cedula", "value": "9990000001" }
+  ],
+  "event": [
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "pm.test('Responde en menos de 1 segundo', function () {",
+          "    pm.expect(pm.response.responseTime).to.be.below(1000);",
+          "});"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - Limpieza previa (borra el residente de prueba si quedó de otra ejecución)",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/residentes/{{cedula}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 204 o 404', function () {",
+        "    pm.expect(pm.response.code).to.be.oneOf([204, 404]);",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-01 - Crear residente con datos válidos",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/residentes",
+        "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"nombre\": \"Residente Postman\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"901\",\n  \"deudaActual\": 120000,\n  \"tieneParqueadero\": true\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+        "pm.test('Devuelve el residente con id', function () {",
+        "    const r = pm.response.json();",
+        "    pm.expect(r.id).to.be.a('number');",
+        "    pm.expect(r.cedula).to.eql(pm.collectionVariables.get('cedula'));",
+        "    pm.expect(r.tieneParqueadero).to.be.true;",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-02 - Crear residente con cédula duplicada",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/residentes",
+        "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"nombre\": \"Otro\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"902\",\n  \"deudaActual\": 0\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 409 Conflict', function () { pm.response.to.have.status(409); });",
+        "pm.test('Explica que la cédula ya existe', function () {",
+        "    pm.expect(pm.response.json().detail).to.include('Ya existe un residente');",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-03 - Crear residente con campos obligatorios vacíos",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/residentes",
+        "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"\",\n  \"nombre\": \"\",\n  \"torre\": \"\",\n  \"apartamento\": \"\",\n  \"deudaActual\": -1\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+        "pm.test('Lista los 5 campos con error', function () {",
+        "    const errores = pm.response.json().errores;",
+        "    pm.expect(Object.keys(errores)).to.have.members(['cedula', 'nombre', 'torre', 'apartamento', 'deudaActual']);",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-04 - Enviar un JSON mal formado",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/residentes",
+        "body": { "mode": "raw", "raw": "{esto no es json" }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+        "pm.test('Explica el problema', function () {",
+        "    pm.expect(pm.response.json().detail).to.include('no es un JSON válido');",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-05 - Consultar residente por cédula",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/residentes/{{cedula}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+        "pm.test('Devuelve los datos guardados', function () {",
+        "    const r = pm.response.json();",
+        "    pm.expect(r.nombre).to.eql('Residente Postman');",
+        "    pm.expect(r.deudaActual).to.eql(120000);",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-06 - Listar residentes filtrando por torre",
+      "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/residentes?torre=Z", "host": ["{{baseUrl}}"], "path": ["api", "residentes"], "query": [{ "key": "torre", "value": "Z" }] } },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+        "pm.test('Todos los resultados son de la torre Z', function () {",
+        "    const lista = pm.response.json();",
+        "    pm.expect(lista.length).to.be.at.least(1);",
+        "    lista.forEach(r => pm.expect(r.torre.toUpperCase()).to.eql('Z'));",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-07 - Listar morosos incluye al residente con deuda",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/residentes/morosos" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+        "pm.test('Todos tienen deuda mayor a 0 e incluye al de prueba', function () {",
+        "    const lista = pm.response.json();",
+        "    lista.forEach(r => pm.expect(r.deudaActual).to.be.above(0));",
+        "    pm.expect(lista.map(r => r.cedula)).to.include(pm.collectionVariables.get('cedula'));",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-08 - Actualizar residente (paga la deuda)",
+      "request": {
+        "method": "PUT",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "url": "{{baseUrl}}/api/residentes/{{cedula}}",
+        "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"nombre\": \"Residente Postman\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"901\",\n  \"deudaActual\": 0,\n  \"tieneParqueadero\": false\n}" }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+        "pm.test('Guarda los cambios', function () {",
+        "    const r = pm.response.json();",
+        "    pm.expect(r.deudaActual).to.eql(0);",
+        "    pm.expect(r.tieneParqueadero).to.be.false;",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-09 - Tras pagar ya no aparece en morosos",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/residentes/morosos" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('No incluye al residente de prueba', function () {",
+        "    pm.expect(pm.response.json().map(r => r.cedula)).to.not.include(pm.collectionVariables.get('cedula'));",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-10 - Eliminar residente",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/residentes/{{cedula}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 204 No Content', function () { pm.response.to.have.status(204); });"
+      ] } }]
+    },
+    {
+      "name": "CP-11 - Consultar un residente eliminado",
+      "request": { "method": "GET", "url": "{{baseUrl}}/api/residentes/{{cedula}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });",
+        "pm.test('Explica que no existe', function () {",
+        "    pm.expect(pm.response.json().detail).to.include('No existe un residente');",
+        "});"
+      ] } }]
+    },
+    {
+      "name": "CP-12 - Eliminar un residente que no existe",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/api/residentes/{{cedula}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+      ] } }]
+    }
+  ]
+}

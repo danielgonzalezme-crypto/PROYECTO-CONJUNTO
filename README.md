@@ -28,7 +28,25 @@ Cada aplicación es dueña de su base de datos. Laravel nunca lee la base de Spr
    ```
 
 3. Comprueba que los cuatro servicios estén arriba: `docker compose ps`
-4. Abre http://127.0.0.1:8000
+4. Abre http://127.0.0.1:8000 e inicia sesión con el usuario de demostración.
+
+## Inicio de sesión
+
+Todas las pantallas exigen iniciar sesión. Al arrancar, el contenedor crea (si no existe) un usuario fijo de demostración:
+
+| Correo | Contraseña |
+|---|---|
+| `admin@conjuntosmart.test` | `Admin12345` |
+
+Está definido en `admin-web/database/seeders/DatabaseSeeder.php`. Como esa contraseña es pública en el repositorio, no compartas la aplicación por internet con este usuario activo.
+
+No hay registro público. Para crear más usuarios (pide nombre, correo y contraseña):
+
+```
+docker compose exec admin-web php artisan app:crear-admin
+```
+
+Tras 5 intentos fallidos con el mismo correo, el acceso se bloquea un minuto para frenar ataques de fuerza bruta.
 
 ## Datos de demostración
 
@@ -82,7 +100,7 @@ Con un túnel rápido de Cloudflare (no requiere cuenta) sobre el puerto de Lara
 cloudflared tunnel --url http://127.0.0.1:8000
 ```
 
-Solo se expone Laravel; Spring y las bases quedan dentro de la red de Docker y enlazadas a 127.0.0.1. La aplicación **no tiene login**: usa solo datos ficticios, comparte la dirección por un canal privado y cierra el túnel al terminar.
+Solo se expone Laravel; Spring y las bases quedan dentro de la red de Docker y enlazadas a 127.0.0.1. Aunque la aplicación pide inicio de sesión, usa solo datos ficticios, comparte la dirección por un canal privado y cierra el túnel al terminar.
 
 ## Estructura
 
@@ -97,7 +115,7 @@ conjuntosmart/
 
 ## Problemas frecuentes
 
-- **Puerto 8000 u 8080 ocupado:** cierra cualquier Spring o `php artisan serve` que tengas corriendo fuera de Docker.
+- **Puerto 8000 u 8080 ocupado:** cierra cualquier Spring o `php artisan serve` que tengas corriendo fuera de Docker. Si el 8080 lo usa otro programa que no puedes cerrar, pon `API_PORT=8081` (u otro libre) en tu `.env` y ejecuta `docker compose up -d`; el script de datos de demostración toma ese puerto solo.
 - **El dashboard muestra el aviso rojo:** Spring aún está arrancando; espera unos segundos y recarga.
 - **Cambié una contraseña en `.env` y no se aplicó:** las bases ya existen con la contraseña anterior. Solo se puede aplicar con `docker compose down -v`, que borra los datos.
 

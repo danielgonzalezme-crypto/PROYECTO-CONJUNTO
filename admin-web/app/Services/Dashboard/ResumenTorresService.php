@@ -3,28 +3,28 @@
 namespace App\Services\Dashboard;
 
 use App\Models\Empleado;
-use App\Services\Residentes\ResidentesApi;
-use App\Services\Residentes\ResidentesApiNoDisponible;
+use App\Services\Residentes\ConsultaResidentes;
 
+/**
+ * @phpstan-type Torre array{
+ *     nombre: string,
+ *     residentes: int,
+ *     morosos: int,
+ *     deuda_total: float,
+ *     con_parqueadero: int,
+ *     personal: array<string, list<string>>
+ * }
+ */
 class ResumenTorresService
 {
-    public function __construct(private readonly ResidentesApi $residentes)
-    {
-    }
+    public function __construct(private readonly ConsultaResidentes $consulta) {}
 
     /**
-     * @return array{torres: array<string, array<string, mixed>>, error: ?string}
+     * @return array{torres: array<string, Torre>, error: ?string}
      */
     public function generar(): array
     {
-        $error = null;
-
-        try {
-            $residentes = $this->residentes->listar();
-        } catch (ResidentesApiNoDisponible $e) {
-            $residentes = [];
-            $error = $e->getMessage();
-        }
+        ['residentes' => $residentes, 'error' => $error] = $this->consulta->listar();
 
         $empleados = Empleado::where('activo', true)->orderBy('nombre')->get();
 
@@ -59,6 +59,9 @@ class ResumenTorresService
         return ['torres' => $torres, 'error' => $error];
     }
 
+    /**
+     * @return Torre
+     */
     private function torreVacia(string $nombre): array
     {
         return [

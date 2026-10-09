@@ -18,7 +18,7 @@ class EmpleadoController extends Controller
 
     public function create(): View
     {
-        return view('empleados.create', ['empleado' => new Empleado()]);
+        return view('empleados.create', ['empleado' => new Empleado]);
     }
 
     public function store(EmpleadoRequest $request): RedirectResponse
@@ -47,6 +47,9 @@ class EmpleadoController extends Controller
         return redirect()->route('empleados.index')->with('ok', 'Empleado eliminado.');
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function datos(EmpleadoRequest $request): array
     {
         // Un checkbox sin marcar no se envía, por eso se normaliza aquí.

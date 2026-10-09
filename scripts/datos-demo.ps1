@@ -1,7 +1,14 @@
-# Crea residentes FICTICIOS en la API de Spring (http://127.0.0.1:8080).
+# Crea residentes FICTICIOS en la API de Spring.
 # Uso:  powershell -ExecutionPolicy Bypass -File .\scripts\datos-demo.ps1
+# Toma el puerto de API_PORT en el archivo .env (por defecto 8080).
 
-$url = "http://127.0.0.1:8080/api/residentes"
+$puerto = 8080
+$envFile = Join-Path (Split-Path -Parent $PSScriptRoot) '.env'
+if (Test-Path $envFile) {
+    $linea = Select-String -Path $envFile -Pattern '^\s*API_PORT\s*=\s*(\d+)' | Select-Object -Last 1
+    if ($linea) { $puerto = $linea.Matches[0].Groups[1].Value }
+}
+$url = "http://127.0.0.1:$puerto/api/residentes"
 
 $residentes = @(
     @{ cedula = "1000000001"; nombre = "Ana Torres (demo)";    torre = "A"; apartamento = "101"; deudaActual = 150000; tieneParqueadero = $true  },

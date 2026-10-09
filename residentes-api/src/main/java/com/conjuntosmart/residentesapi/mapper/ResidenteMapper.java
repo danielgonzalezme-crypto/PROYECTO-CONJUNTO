@@ -23,9 +23,9 @@ public class ResidenteMapper {
         residente.setTieneParqueadero(request.tieneParqueadero());
     }
 
-    public ResidenteResponse toResponse(Residente r) {
-        return new ResidenteResponse(r.getId(), r.getCedula(), r.getNombre(),
-                r.getTorre(), r.getApartamento(), r.getDeudaActual(),
-                r.isTieneParqueadero());
+    public ResidenteResponse toResponse(Residente residente) {
+        return new ResidenteResponse(residente.getId(), residente.getCedula(), residente.getNombre(),
+                residente.getTorre(), residente.getApartamento(), residente.getDeudaActual(),
+                residente.isTieneParqueadero());
     }
 }

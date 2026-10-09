@@ -4,6 +4,4 @@ namespace App\Services\Residentes;
 
 use RuntimeException;
 
-class ResidentesApiNoDisponible extends RuntimeException
-{
-}
+class ResidentesApiNoDisponible extends RuntimeException {}

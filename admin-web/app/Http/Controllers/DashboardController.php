@@ -7,9 +7,7 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly ResumenTorresService $resumen)
-    {
-    }
+    public function __construct(private readonly ResumenTorresService $resumen) {}
 
     public function index(): View
     {

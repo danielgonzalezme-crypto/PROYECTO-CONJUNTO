@@ -2,11 +2,17 @@
 
 namespace App\Models;
 
+use Database\Factories\EmpleadoFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Empleado extends Model
 {
+    /** @use HasFactory<EmpleadoFactory> */
+    use HasFactory;
+
     public const CARGOS = ['Vigilante', 'Aseador', 'Mantenimiento', 'Administrativo'];
+
     public const TURNOS = ['Mañana', 'Tarde', 'Noche'];
 
     protected $fillable = [

@@ -3,23 +3,24 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
+    public const ADMIN_EMAIL = 'admin@conjuntosmart.test';
+
+    public const ADMIN_PASSWORD = 'Admin12345';
 
     /**
-     * Seed the application's database.
+     * Usuario fijo de demostración. Se crea al arrancar el contenedor si no existe;
+     * si ya existe no se toca, así un cambio de contraseña posterior se conserva.
+     * Para más usuarios: php artisan app:crear-admin
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::firstOrCreate(
+            ['email' => self::ADMIN_EMAIL],
+            ['name' => 'Administrador', 'password' => self::ADMIN_PASSWORD],
+        );
     }
 }
