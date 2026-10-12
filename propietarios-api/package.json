@@ -1,0 +1,22 @@
+{
+  "name": "propietarios-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "API de datos de contacto y detalles de propietarios/residentes de ConjuntoSmart",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "express": "5.3.0",
+    "mysql2": "3.24.5",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/node": "22.20.5",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}
