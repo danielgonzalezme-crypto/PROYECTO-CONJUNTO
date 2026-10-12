@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-            - name: Crear .env con contraseñas aleatorias
+      - name: Crear .env con contraseñas aleatorias
         run: |
           {
             echo "RESIDENTES_DB_ROOT_PASSWORD=$(openssl rand -hex 16)"
