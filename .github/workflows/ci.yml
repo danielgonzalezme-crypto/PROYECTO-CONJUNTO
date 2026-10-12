@@ -68,13 +68,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: Crear .env con contraseñas aleatorias
+            - name: Crear .env con contraseñas aleatorias
         run: |
           {
             echo "RESIDENTES_DB_ROOT_PASSWORD=$(openssl rand -hex 16)"
             echo "RESIDENTES_DB_PASSWORD=$(openssl rand -hex 16)"
             echo "ADMIN_DB_ROOT_PASSWORD=$(openssl rand -hex 16)"
             echo "ADMIN_DB_PASSWORD=$(openssl rand -hex 16)"
+            echo "PROPIETARIOS_DB_ROOT_PASSWORD=$(openssl rand -hex 16)"
+            echo "PROPIETARIOS_DB_PASSWORD=$(openssl rand -hex 16)"
             echo "APP_KEY=base64:$(openssl rand -base64 32)"
           } > .env
       - name: Construir y levantar los contenedores
