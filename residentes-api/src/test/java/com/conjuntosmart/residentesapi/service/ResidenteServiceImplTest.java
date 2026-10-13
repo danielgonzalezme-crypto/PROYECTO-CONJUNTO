@@ -52,7 +52,7 @@ class ResidenteServiceImplTest {
     void listarSinTorreDevuelveTodos(String torre) {
         when(repository.findAll()).thenReturn(List.of(residente("1"), residente("2")));
 
-        assertThat(service.listar(torre)).hasSize(2);
+        assertThat(service.listar(torre, null)).hasSize(2);
         verify(repository, never()).findByTorre(any());
     }
 
@@ -60,8 +60,38 @@ class ResidenteServiceImplTest {
     void listarConTorreFiltra() {
         when(repository.findByTorre("B")).thenReturn(List.of(residente("1")));
 
-        assertThat(service.listar("B")).extracting(ResidenteResponse::cedula).containsExactly("1");
+        assertThat(service.listar("B", null)).extracting(ResidenteResponse::cedula).containsExactly("1");
         verify(repository, never()).findAll();
+    }
+
+    @Test
+    void listarConDeudaMinimaFiltraPorDeuda() {
+        BigDecimal minima = new BigDecimal("1000000");
+        when(repository.findByDeudaActualGreaterThanEqual(minima)).thenReturn(List.of(residente("1")));
+
+        assertThat(service.listar(null, minima)).extracting(ResidenteResponse::cedula).containsExactly("1");
+        verify(repository, never()).findAll();
+        verify(repository, never()).findByTorre(any());
+    }
+
+    @Test
+    void listarConTorreYDeudaMinimaCombinaLosFiltros() {
+        BigDecimal minima = new BigDecimal("100000");
+        when(repository.findByTorreAndDeudaActualGreaterThanEqual("A", minima)).thenReturn(List.of(residente("1")));
+
+        assertThat(service.listar("A", minima)).hasSize(1);
+        verify(repository, never()).findAll();
+        verify(repository, never()).findByTorre(any());
+        verify(repository, never()).findByDeudaActualGreaterThanEqual(any());
+    }
+
+    @Test
+    void listarConTorreEnBlancoYDeudaUsaSoloLaDeuda() {
+        BigDecimal minima = new BigDecimal("50000");
+        when(repository.findByDeudaActualGreaterThanEqual(minima)).thenReturn(List.of(residente("1")));
+
+        assertThat(service.listar("   ", minima)).hasSize(1);
+        verify(repository, never()).findByTorreAndDeudaActualGreaterThanEqual(any(), any());
     }
 
     @Test
