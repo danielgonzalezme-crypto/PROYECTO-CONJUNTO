@@ -75,6 +75,8 @@ jobs:
             echo "RESIDENTES_DB_PASSWORD=$(openssl rand -hex 16)"
             echo "ADMIN_DB_ROOT_PASSWORD=$(openssl rand -hex 16)"
             echo "ADMIN_DB_PASSWORD=$(openssl rand -hex 16)"
+            echo "PROPIETARIOS_DB_ROOT_PASSWORD=$(openssl rand -hex 16)"
+            echo "PROPIETARIOS_DB_PASSWORD=$(openssl rand -hex 16)"
             echo "APP_KEY=base64:$(openssl rand -base64 32)"
           } > .env
       - name: Construir y levantar los contenedores
