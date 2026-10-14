@@ -40,6 +40,25 @@ services:
       timeout: 5s
       retries: 10
 
+  propietarios-db:
+    image: mysql:8.0
+    container_name: propietarios-db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${PROPIETARIOS_DB_ROOT_PASSWORD:?Falta PROPIETARIOS_DB_ROOT_PASSWORD en el archivo .env}
+      MYSQL_DATABASE: propietarios_db
+      MYSQL_USER: propietarios_user
+      MYSQL_PASSWORD: ${PROPIETARIOS_DB_PASSWORD:?Falta PROPIETARIOS_DB_PASSWORD en el archivo .env}
+    ports:
+      - "127.0.0.1:3310:3306"
+    volumes:
+      - propietarios_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
   residentes-api:
     build: ./residentes-api
     restart: unless-stopped
@@ -56,6 +75,30 @@ services:
     ports:
       # Puerto del equipo configurable con API_PORT en .env (por defecto 8080).
       - "127.0.0.1:${API_PORT:-8080}:8080"
+
+  propietarios-api:
+    build: ./propietarios-api
+    restart: unless-stopped
+    depends_on:
+      propietarios-db:
+        condition: service_healthy
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3000"
+      DB_HOST: propietarios-db
+      DB_PORT: "3306"
+      DB_NAME: propietarios_db
+      DB_USER: propietarios_user
+      DB_PASSWORD: ${PROPIETARIOS_DB_PASSWORD}
+    ports:
+      # Puerto del equipo configurable con PROPIETARIOS_API_PORT en .env (por defecto 3000).
+      - "127.0.0.1:${PROPIETARIOS_API_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3000/health >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
 
   admin-web:
     build: ./admin-web
@@ -94,3 +137,4 @@ services:
 volumes:
   residentes_data:
   administrativo_data:
+  propietarios_data:
