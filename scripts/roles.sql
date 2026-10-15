@@ -1,5 +1,5 @@
 -- Roles de MySQL del proyecto (se aplican a cada una de las tres bases).
--- __DB__ y __CLAVE__ los reemplaza scripts/aplicar-roles.sh.
+-- Los marcadores de nombre de base y de clave los reemplaza scripts/aplicar-roles.sh.
 CREATE ROLE IF NOT EXISTS 'rol_admin', 'rol_escritura', 'rol_lectura';
 
 GRANT ALL PRIVILEGES ON `__DB__`.* TO 'rol_admin';

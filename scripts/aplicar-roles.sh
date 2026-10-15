@@ -13,7 +13,7 @@ if ! docker ps >/dev/null 2>&1; then DOCKER="sudo docker"; fi
 CLAVE=${1:-$(openssl rand -hex 8)}
 
 for svc in residentes-db administrativo-db propietarios-db; do
-  DB=$($DOCKER compose exec -T "$svc" printenv MYSQL_DATABASE | tr -d '\r')
+  DB=${svc//-/_}   # residentes-db -> residentes_db (nombre de la base, segun el docker-compose.yml)
   echo "== $svc ($DB) =="
   sed -e "s/__DB__/$DB/g" -e "s/__CLAVE__/$CLAVE/g" scripts/roles.sql \
     | $DOCKER compose exec -T "$svc" sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD"' 2>&1 \
