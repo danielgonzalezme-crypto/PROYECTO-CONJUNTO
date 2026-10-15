@@ -38,5 +38,9 @@ return [
         'url' => env('RESIDENTES_API_URL', 'http://127.0.0.1:8080'),
         'timeout' => env('RESIDENTES_API_TIMEOUT', 5),
     ],
+    'propietarios' => [
+        'url' => env('PROPIETARIOS_API_URL', 'http://127.0.0.1:3000'),
+        'timeout' => env('PROPIETARIOS_API_TIMEOUT', 5),
+    ],
 
 ];

@@ -108,6 +108,8 @@ services:
         condition: service_healthy
       residentes-api:
         condition: service_started
+      propietarios-api:
+        condition: service_started
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
@@ -125,6 +127,8 @@ services:
       QUEUE_CONNECTION: database
       RESIDENTES_API_URL: http://residentes-api:8080
       RESIDENTES_API_TIMEOUT: "5"
+      PROPIETARIOS_API_URL: http://propietarios-api:3000
+      PROPIETARIOS_API_TIMEOUT: "5"
     ports:
       # CAMBIO: en tu PC queda en 127.0.0.1; en la VM se abre con ADMIN_WEB_BIND=0.0.0.0 en .env
       - "${ADMIN_WEB_BIND:-127.0.0.1}:8000:8000"

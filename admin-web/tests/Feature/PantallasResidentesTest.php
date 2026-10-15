@@ -28,6 +28,8 @@ class PantallasResidentesTest extends TestCase
         parent::setUp();
 
         $this->actingAs(User::factory()->create());
+
+        Http::fake(['*/api/propietarios*' => Http::response([])]);
     }
 
     public function test_la_pantalla_de_residentes_muestra_los_datos_de_la_api(): void
