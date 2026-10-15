@@ -26,10 +26,19 @@ public class ResidenteServiceImpl implements ResidenteService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ResidenteResponse> listar(String torre) {
-        List<Residente> residentes = (torre == null || torre.isBlank())
-                ? repository.findAll()
-                : repository.findByTorre(torre);
+    public List<ResidenteResponse> listar(String torre, BigDecimal deudaMinima) {
+        boolean hayTorre = torre != null && !torre.isBlank();
+        boolean hayDeuda = deudaMinima != null;
+        List<Residente> residentes;
+        if (hayTorre && hayDeuda) {
+            residentes = repository.findByTorreAndDeudaActualGreaterThanEqual(torre, deudaMinima);
+        } else if (hayTorre) {
+            residentes = repository.findByTorre(torre);
+        } else if (hayDeuda) {
+            residentes = repository.findByDeudaActualGreaterThanEqual(deudaMinima);
+        } else {
+            residentes = repository.findAll();
+        }
         return residentes.stream().map(mapper::toResponse).toList();
     }
 

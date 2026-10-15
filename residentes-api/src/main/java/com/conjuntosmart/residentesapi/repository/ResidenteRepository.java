@@ -11,4 +11,6 @@ public interface ResidenteRepository extends JpaRepository<Residente, Long> {
     boolean existsByCedula(String cedula);
     List<Residente> findByTorre(String torre);
     List<Residente> findByDeudaActualGreaterThan(BigDecimal valor);
+    List<Residente> findByDeudaActualGreaterThanEqual(BigDecimal valor);
+    List<Residente> findByTorreAndDeudaActualGreaterThanEqual(String torre, BigDecimal valor);
 }
