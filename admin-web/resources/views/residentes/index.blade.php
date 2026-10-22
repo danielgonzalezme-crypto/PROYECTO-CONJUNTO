@@ -34,7 +34,20 @@
                     <td>{{ $residente['torre'] }}</td>
                     <td>{{ $residente['apartamento'] }}</td>
                     <td>${{ number_format($residente['deudaActual'], 0, ',', '.') }}</td>
-                    <td>{{ $residente['tieneParqueadero'] ? 'Sí' : 'No' }}</td>
+                    <td>
+                        @if ($residente['tieneParqueadero'])
+                            <a href="{{ route('parqueaderos.index', ['cedula' => $residente['cedula']]) }}" style="text-decoration: none;" title="Inspeccionar parqueadero">
+                                <span style="background: #ecfdf5; color: #047857; font-weight: 700; padding: 3px 8px; border-radius: 6px; font-size: 0.85rem; border: 1px solid #a7f3d0; display: inline-flex; align-items: center; gap: 4px;">
+                                    Sí
+                                    @if (!empty($residente['contacto']['numeroParqueadero']))
+                                        · <strong>{{ $residente['contacto']['numeroParqueadero'] }}</strong>
+                                    @endif
+                                </span>
+                            </a>
+                        @else
+                            <span style="color: #94a3b8; font-size: 0.88rem;">No</span>
+                        @endif
+                    </td>
                     <td>{{ $residente['contacto']['telefono'] ?? '—' }}</td>
                     <td>{{ $residente['contacto']['correo'] ?? '—' }}</td>
                 </tr>

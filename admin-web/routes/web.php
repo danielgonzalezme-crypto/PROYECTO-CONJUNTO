@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmpleadoController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\ParqueaderoController;
 use App\Http\Controllers\ResidenteController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,4 +19,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
     Route::resource('empleados', EmpleadoController::class)->except('show');
     Route::get('/residentes', [ResidenteController::class, 'index'])->name('residentes.index');
+    Route::get('/parqueaderos', [ParqueaderoController::class, 'index'])->name('parqueaderos.index');
+    Route::get('/parqueaderos/api/{cedula}', [ParqueaderoController::class, 'consultar'])->name('parqueaderos.consultar');
 });

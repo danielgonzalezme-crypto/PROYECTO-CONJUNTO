@@ -13,4 +13,9 @@ interface ResidentesApi
      * @return array<int, array<string, mixed>>
      */
     public function morosos(): array;
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function obtener(string $cedula): ?array;
 }

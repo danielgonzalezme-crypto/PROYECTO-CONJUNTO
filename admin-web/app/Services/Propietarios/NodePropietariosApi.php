@@ -33,4 +33,36 @@ class NodePropietariosApi implements PropietariosApi
 
         return $respuesta->json() ?? [];
     }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function obtener(string $cedula): ?array
+    {
+        try {
+            $respuesta = Http::baseUrl($this->baseUrl)
+                ->timeout($this->timeout)
+                ->acceptJson()
+                ->get('/api/propietarios/'.rawurlencode($cedula));
+        } catch (ConnectionException $e) {
+            throw new PropietariosApiNoDisponible(
+                'No se pudo conectar con la API de propietarios.', 0, $e
+            );
+        }
+
+        if ($respuesta->status() === 404) {
+            return null;
+        }
+
+        if ($respuesta->failed()) {
+            throw new PropietariosApiNoDisponible(
+                'La API de propietarios respondió con error '.$respuesta->status().'.'
+            );
+        }
+
+        /** @var array<string, mixed>|null $json */
+        $json = $respuesta->json();
+
+        return $json;
+    }
 }

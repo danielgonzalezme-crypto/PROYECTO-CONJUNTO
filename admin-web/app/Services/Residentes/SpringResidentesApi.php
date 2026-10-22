@@ -23,6 +23,38 @@ class SpringResidentesApi implements ResidentesApi
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public function obtener(string $cedula): ?array
+    {
+        try {
+            $respuesta = Http::baseUrl($this->baseUrl)
+                ->timeout($this->timeout)
+                ->acceptJson()
+                ->get('/api/residentes/'.rawurlencode($cedula));
+        } catch (ConnectionException $e) {
+            throw new ResidentesApiNoDisponible(
+                'No se pudo conectar con la API de residentes.', 0, $e
+            );
+        }
+
+        if ($respuesta->status() === 404) {
+            return null;
+        }
+
+        if ($respuesta->failed()) {
+            throw new ResidentesApiNoDisponible(
+                'La API de residentes respondió con error '.$respuesta->status().'.'
+            );
+        }
+
+        /** @var array<string, mixed>|null $json */
+        $json = $respuesta->json();
+
+        return $json;
+    }
+
+    /**
      * @param  array<string, string>  $consulta
      * @return array<int, array<string, mixed>>
      */

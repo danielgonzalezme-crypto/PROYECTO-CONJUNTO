@@ -21,4 +21,16 @@ class ConsultaResidentes
             return ['residentes' => [], 'error' => $e->getMessage()];
         }
     }
+
+    /**
+     * @return array{residente: array<string, mixed>|null, error: ?string}
+     */
+    public function obtener(string $cedula): array
+    {
+        try {
+            return ['residente' => $this->api->obtener($cedula), 'error' => null];
+        } catch (ResidentesApiNoDisponible $e) {
+            return ['residente' => null, 'error' => $e->getMessage()];
+        }
+    }
 }

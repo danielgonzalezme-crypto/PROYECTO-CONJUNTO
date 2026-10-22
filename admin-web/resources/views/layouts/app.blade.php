@@ -557,6 +557,13 @@
                         </svg>
                         Residentes
                     </a>
+                    <a href="{{ route('parqueaderos.index') }}" class="{{ request()->routeIs('parqueaderos.*') ? 'active' : '' }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="3" width="18" height="18" rx="4"/>
+                            <path d="M9 17V7h4a3 3 0 0 1 0 6H9"/>
+                        </svg>
+                        Parqueaderos
+                    </a>
                 </nav>
 
                 <div class="user-nav-section">
