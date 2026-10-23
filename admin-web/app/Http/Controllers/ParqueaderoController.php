@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Services\Propietarios\PropietariosApi;
 use App\Services\Propietarios\PropietariosApiNoDisponible;
 use App\Services\Residentes\ConsultaResidentes;
-use App\Services\Residentes\ResidentesApiNoDisponible;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -63,15 +62,15 @@ class ParqueaderoController extends Controller
             if ($tieneParq) {
                 $totalConDerechoParqueadero++;
             }
-            if (!empty($numeroBahia)) {
+            if (! empty($numeroBahia)) {
                 $totalBahiasAsignadas++;
             }
-            if (!empty($placa)) {
+            if (! empty($placa)) {
                 $totalVehiculosRegistrados++;
             }
 
             // Solo mostrar en la tabla si tiene parqueadero en Java o bahía/placa en Node
-            if ($tieneParq || !empty($numeroBahia) || !empty($placa)) {
+            if ($tieneParq || ! empty($numeroBahia) || ! empty($placa)) {
                 $parqueaderos[] = [
                     'cedula' => $ced,
                     'nombre' => $res['nombre'] ?? '—',
