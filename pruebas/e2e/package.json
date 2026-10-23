@@ -1,0 +1,14 @@
+{
+  "name": "conjuntosmart-e2e",
+  "private": true,
+  "description": "Pruebas de extremo a extremo con Playwright: un navegador real usa la web de ConjuntoSmart.",
+  "scripts": {
+    "test": "playwright test",
+    "test:ver": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "reporte": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}
