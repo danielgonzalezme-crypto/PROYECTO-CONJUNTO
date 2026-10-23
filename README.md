@@ -189,7 +189,7 @@ Cada push a GitHub ejecuta el flujo de integración continua (`.github/workflows
 |---|---|
 | API Spring Boot | PMD, CPD (código duplicado), pruebas JUnit y cobertura con JaCoCo |
 | Web Laravel | Estilo con Pint, PHPStan + Larastan (nivel 6) y PHPUnit con cobertura |
-| Sistema completo | Levanta todo con Docker Compose, ejecuta las pruebas de Postman con Newman y comprueba que, sin sesión, la web redirige al login |
+| Sistema completo | Levanta todo con Docker Compose, ejecuta las pruebas de Postman con Newman y las de Playwright en el navegador, y comprueba que, sin sesión, la web redirige al login |
 
 El tercer trabajo solo corre si pasan los dos primeros. Para ejecutar todas las pruebas en tu equipo (con el proyecto encendido):
 
@@ -198,6 +198,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\ejecutar-pruebas.ps1
 ```
 
 Agrega `-SinCarga` para omitir la prueba de rendimiento con k6, que tarda cerca de un minuto. Los resultados quedan en `pruebas/resultados/` y su resumen en `pruebas/RESULTADOS.md`. El documento de calidad de la entrega es `CALIDAD_DE_SOFTWARE_SEGUNDA_ENTREGA.md`.
+
+### Pruebas en el navegador (Playwright)
+
+Un navegador real usa la web como una persona: inicia y cierra sesión, crea, edita y borra un empleado, revisa el dashboard, busca residentes por nombre, cédula, teléfono o correo, y consulta parqueaderos cruzando las APIs de Java y Node. Cada prueba crea sus propios datos por las APIs y los borra al terminar. Requieren el sistema encendido y Node.js; en Windows usan Microsoft Edge.
+
+```
+cd pruebas/e2e
+npm install
+npm test              # todas las pruebas
+npm run test:ver      # con el navegador visible y más despacio (para exposiciones)
+npm run reporte       # reporte HTML de la última ejecución
+```
 
 ## Uso diario
 

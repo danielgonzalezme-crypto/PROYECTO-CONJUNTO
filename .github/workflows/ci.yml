@@ -85,6 +85,7 @@ jobs:
         run: |
           for i in $(seq 1 60); do
             if curl -fs http://127.0.0.1:8080/api/residentes > /dev/null \
+              && curl -fs http://127.0.0.1:3000/api/propietarios > /dev/null \
               && curl -fs http://127.0.0.1:8000/login > /dev/null; then
               echo "Sistema listo"; exit 0
             fi
@@ -97,6 +98,21 @@ jobs:
           docker run --rm --network conjuntosmart_default -v "$PWD/pruebas:/etc/newman" \
             postman/newman:6-alpine run postman/ConjuntoSmart-API.postman_collection.json \
             --env-var baseUrl=http://residentes-api:8080 --color on
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+      - name: Pruebas de extremo a extremo en el navegador (Playwright)
+        working-directory: pruebas/e2e
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - name: Guardar reporte de Playwright
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: reporte-playwright
+          path: pruebas/e2e/playwright-report/
       - name: Sin sesión, la web redirige al login
         run: |
           codigo=$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8000/dashboard)
