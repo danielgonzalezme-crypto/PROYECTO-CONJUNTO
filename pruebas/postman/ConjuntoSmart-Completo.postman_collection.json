@@ -1,0 +1,551 @@
+{
+  "info": {
+    "name": "ConjuntoSmart - Colección completa",
+    "description": "Todas las rutas de ConjuntoSmart: API de residentes (Spring Boot, :8080), API de propietarios (Node.js, :3000) y el endpoint JSON de Laravel (:8000) que cruza ambas APIs. Ejecutar en orden (Runner de Postman o Newman): prepara datos de prueba con la cédula {{cedula}}, prueba cada ruta y al final borra todo lo que creó. Requiere el proyecto encendido con `docker compose up -d`.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "springUrl", "value": "http://127.0.0.1:8080" },
+    { "key": "nodeUrl", "value": "http://127.0.0.1:3000" },
+    { "key": "webUrl", "value": "http://127.0.0.1:8000" },
+    { "key": "cedula", "value": "9990000101" },
+    { "key": "cedulaInexistente", "value": "0000000000" },
+    { "key": "adminEmail", "value": "admin@conjuntosmart.test" },
+    { "key": "adminPassword", "value": "Admin12345" },
+    { "key": "csrfToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0 - Preparación",
+      "item": [
+        {
+          "name": "Estado de la API de propietarios (GET /health)",
+          "request": { "method": "GET", "url": "{{nodeUrl}}/health" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Estado ok', function () { pm.expect(pm.response.json().estado).to.eql('ok'); });"
+          ] } }]
+        },
+        {
+          "name": "Limpieza previa del residente de prueba (Spring)",
+          "request": { "method": "DELETE", "url": "{{springUrl}}/api/residentes/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 204 o 404', function () { pm.expect(pm.response.code).to.be.oneOf([204, 404]); });"
+          ] } }]
+        },
+        {
+          "name": "Limpieza previa del propietario de prueba (Node)",
+          "request": { "method": "DELETE", "url": "{{nodeUrl}}/api/propietarios/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 204 o 404', function () { pm.expect(pm.response.code).to.be.oneOf([204, 404]); });"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "1 - API de residentes (Spring Boot)",
+      "item": [
+        {
+          "name": "Crear residente (POST /api/residentes)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{springUrl}}/api/residentes",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"nombre\": \"Residente Postman\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"901\",\n  \"deudaActual\": 120000,\n  \"tieneParqueadero\": true\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+            "pm.test('Devuelve el residente creado', function () {",
+            "    const r = pm.response.json();",
+            "    pm.expect(r.id).to.be.a('number');",
+            "    pm.expect(r.cedula).to.eql(pm.collectionVariables.get('cedula'));",
+            "    pm.expect(r.tieneParqueadero).to.be.true;",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Crear residente con cédula duplicada (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{springUrl}}/api/residentes",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"nombre\": \"Otro\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"902\",\n  \"deudaActual\": 0\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 409 Conflict', function () { pm.response.to.have.status(409); });",
+            "pm.test('Explica que la cédula ya existe', function () { pm.expect(pm.response.json().detail).to.include('Ya existe un residente'); });"
+          ] } }]
+        },
+        {
+          "name": "Crear residente con datos inválidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{springUrl}}/api/residentes",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"\",\n  \"nombre\": \"\",\n  \"torre\": \"\",\n  \"apartamento\": \"\",\n  \"deudaActual\": -1\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+            "pm.test('Lista los 5 campos con error', function () {",
+            "    pm.expect(Object.keys(pm.response.json().errores)).to.have.members(['cedula', 'nombre', 'torre', 'apartamento', 'deudaActual']);",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Crear residente con JSON mal formado (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{springUrl}}/api/residentes",
+            "body": { "mode": "raw", "raw": "{esto no es json" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+            "pm.test('Explica el problema', function () { pm.expect(pm.response.json().detail).to.include('no es un JSON válido'); });"
+          ] } }]
+        },
+        {
+          "name": "Consultar residente por cédula (GET /api/residentes/{cedula})",
+          "request": { "method": "GET", "url": "{{springUrl}}/api/residentes/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Devuelve los datos guardados', function () {",
+            "    const r = pm.response.json();",
+            "    pm.expect(r.nombre).to.eql('Residente Postman');",
+            "    pm.expect(r.torre).to.eql('Z');",
+            "    pm.expect(r.deudaActual).to.eql(120000);",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Consultar residente inexistente (404)",
+          "request": { "method": "GET", "url": "{{springUrl}}/api/residentes/{{cedulaInexistente}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });",
+            "pm.test('Explica que no existe', function () { pm.expect(pm.response.json().detail).to.include('No existe un residente'); });"
+          ] } }]
+        },
+        {
+          "name": "Listar todos los residentes (GET /api/residentes)",
+          "request": { "method": "GET", "url": "{{springUrl}}/api/residentes" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Es una lista que incluye al de prueba', function () {",
+            "    const lista = pm.response.json();",
+            "    pm.expect(lista).to.be.an('array');",
+            "    pm.expect(lista.map(r => r.cedula)).to.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Listar residentes por torre (?torre=Z)",
+          "request": { "method": "GET", "url": { "raw": "{{springUrl}}/api/residentes?torre=Z", "host": ["{{springUrl}}"], "path": ["api", "residentes"], "query": [{ "key": "torre", "value": "Z" }] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Todos son de la torre Z', function () {",
+            "    const lista = pm.response.json();",
+            "    pm.expect(lista.length).to.be.at.least(1);",
+            "    lista.forEach(r => pm.expect(r.torre.toUpperCase()).to.eql('Z'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Listar residentes con deuda mínima (?deudaMinima=100000)",
+          "request": { "method": "GET", "url": { "raw": "{{springUrl}}/api/residentes?deudaMinima=100000", "host": ["{{springUrl}}"], "path": ["api", "residentes"], "query": [{ "key": "deudaMinima", "value": "100000" }] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Todos deben 100000 o más e incluye al de prueba', function () {",
+            "    const lista = pm.response.json();",
+            "    lista.forEach(r => pm.expect(r.deudaActual).to.be.at.least(100000));",
+            "    pm.expect(lista.map(r => r.cedula)).to.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Listar residentes combinando filtros (?torre=Z&deudaMinima=200000)",
+          "request": { "method": "GET", "url": { "raw": "{{springUrl}}/api/residentes?torre=Z&deudaMinima=200000", "host": ["{{springUrl}}"], "path": ["api", "residentes"], "query": [{ "key": "torre", "value": "Z" }, { "key": "deudaMinima", "value": "200000" }] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('No incluye al de prueba (debe 120000)', function () {",
+            "    pm.expect(pm.response.json().map(r => r.cedula)).to.not.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Listar morosos (GET /api/residentes/morosos)",
+          "request": { "method": "GET", "url": "{{springUrl}}/api/residentes/morosos" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Todos deben algo e incluye al de prueba', function () {",
+            "    const lista = pm.response.json();",
+            "    lista.forEach(r => pm.expect(r.deudaActual).to.be.above(0));",
+            "    pm.expect(lista.map(r => r.cedula)).to.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Actualizar residente: paga la deuda (PUT /api/residentes/{cedula})",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{springUrl}}/api/residentes/{{cedula}}",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"nombre\": \"Residente Postman\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"901\",\n  \"deudaActual\": 0,\n  \"tieneParqueadero\": true\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Guarda la deuda en 0', function () { pm.expect(pm.response.json().deudaActual).to.eql(0); });"
+          ] } }]
+        },
+        {
+          "name": "Tras pagar ya no aparece en morosos",
+          "request": { "method": "GET", "url": "{{springUrl}}/api/residentes/morosos" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('No incluye al de prueba', function () {",
+            "    pm.expect(pm.response.json().map(r => r.cedula)).to.not.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Actualizar residente inexistente (404)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{springUrl}}/api/residentes/{{cedulaInexistente}}",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedulaInexistente}}\",\n  \"nombre\": \"Nadie\",\n  \"torre\": \"Z\",\n  \"apartamento\": \"000\",\n  \"deudaActual\": 0\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "2 - API de propietarios (Node.js)",
+      "item": [
+        {
+          "name": "Crear propietario (POST /api/propietarios)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{nodeUrl}}/api/propietarios",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"telefono\": \"300 123 4567\",\n  \"correo\": \"residente.postman@example.com\",\n  \"tipoResidente\": \"PROPIETARIO\",\n  \"contactoEmergenciaNombre\": \"Contacto Postman\",\n  \"contactoEmergenciaTelefono\": \"3109876543\",\n  \"placaVehiculo\": \"abc123\",\n  \"numeroParqueadero\": \"P-901\",\n  \"tieneMascotas\": true,\n  \"observaciones\": \"Creado desde Postman\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 201 Created', function () { pm.response.to.have.status(201); });",
+            "pm.test('Devuelve la ficha creada', function () {",
+            "    const p = pm.response.json();",
+            "    pm.expect(p.id).to.be.a('number');",
+            "    pm.expect(p.cedula).to.eql(pm.collectionVariables.get('cedula'));",
+            "    pm.expect(p.tipoResidente).to.eql('PROPIETARIO');",
+            "    pm.expect(p.tieneMascotas).to.be.true;",
+            "});",
+            "pm.test('Normaliza la placa a mayúsculas', function () { pm.expect(pm.response.json().placaVehiculo).to.eql('ABC123'); });"
+          ] } }]
+        },
+        {
+          "name": "Crear propietario con cédula duplicada (409)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{nodeUrl}}/api/propietarios",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"{{cedula}}\",\n  \"tipoResidente\": \"ARRENDATARIO\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 409 Conflict', function () { pm.response.to.have.status(409); });",
+            "pm.test('Explica que la cédula ya existe', function () { pm.expect(pm.response.json().detail).to.include('Ya existe un propietario'); });"
+          ] } }]
+        },
+        {
+          "name": "Crear propietario con datos inválidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{nodeUrl}}/api/propietarios",
+            "body": { "mode": "raw", "raw": "{\n  \"cedula\": \"12\",\n  \"correo\": \"no-es-correo\",\n  \"tipoResidente\": \"VISITANTE\",\n  \"placaVehiculo\": \"!!\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+            "pm.test('Señala los campos con error', function () {",
+            "    const campos = pm.response.json().errores.map(e => e.campo);",
+            "    pm.expect(campos).to.include.members(['cedula', 'correo', 'tipoResidente', 'placaVehiculo']);",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Crear propietario con JSON mal formado (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{nodeUrl}}/api/propietarios",
+            "body": { "mode": "raw", "raw": "{esto no es json" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 400 Bad Request', function () { pm.response.to.have.status(400); });",
+            "pm.test('Explica el problema', function () { pm.expect(pm.response.json().detail).to.include('no es un JSON válido'); });"
+          ] } }]
+        },
+        {
+          "name": "Consultar propietario por cédula (GET /api/propietarios/{cedula})",
+          "request": { "method": "GET", "url": "{{nodeUrl}}/api/propietarios/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Devuelve los datos guardados', function () {",
+            "    const p = pm.response.json();",
+            "    pm.expect(p.correo).to.eql('residente.postman@example.com');",
+            "    pm.expect(p.numeroParqueadero).to.eql('P-901');",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Consultar propietario inexistente (404)",
+          "request": { "method": "GET", "url": "{{nodeUrl}}/api/propietarios/{{cedulaInexistente}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });",
+            "pm.test('Explica que no existe', function () { pm.expect(pm.response.json().detail).to.include('No existe un propietario'); });"
+          ] } }]
+        },
+        {
+          "name": "Listar propietarios (GET /api/propietarios)",
+          "request": { "method": "GET", "url": "{{nodeUrl}}/api/propietarios" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Es una lista que incluye al de prueba', function () {",
+            "    const lista = pm.response.json();",
+            "    pm.expect(lista).to.be.an('array');",
+            "    pm.expect(lista.map(p => p.cedula)).to.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Listar propietarios por tipo (?tipo=PROPIETARIO)",
+          "request": { "method": "GET", "url": { "raw": "{{nodeUrl}}/api/propietarios?tipo=PROPIETARIO", "host": ["{{nodeUrl}}"], "path": ["api", "propietarios"], "query": [{ "key": "tipo", "value": "PROPIETARIO" }] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Todos son PROPIETARIO e incluye al de prueba', function () {",
+            "    const lista = pm.response.json();",
+            "    lista.forEach(p => pm.expect(p.tipoResidente).to.eql('PROPIETARIO'));",
+            "    pm.expect(lista.map(p => p.cedula)).to.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Listar propietarios por tipo (?tipo=ARRENDATARIO)",
+          "request": { "method": "GET", "url": { "raw": "{{nodeUrl}}/api/propietarios?tipo=ARRENDATARIO", "host": ["{{nodeUrl}}"], "path": ["api", "propietarios"], "query": [{ "key": "tipo", "value": "ARRENDATARIO" }] } },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Todos son ARRENDATARIO y no incluye al de prueba', function () {",
+            "    const lista = pm.response.json();",
+            "    lista.forEach(p => pm.expect(p.tipoResidente).to.eql('ARRENDATARIO'));",
+            "    pm.expect(lista.map(p => p.cedula)).to.not.include(pm.collectionVariables.get('cedula'));",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Actualizar propietario (PUT /api/propietarios/{cedula})",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{nodeUrl}}/api/propietarios/{{cedula}}",
+            "body": { "mode": "raw", "raw": "{\n  \"telefono\": \"3001112233\",\n  \"correo\": \"residente.postman@example.com\",\n  \"tipoResidente\": \"PROPIETARIO\",\n  \"placaVehiculo\": \"XYZ987\",\n  \"numeroParqueadero\": \"P-902\",\n  \"tieneMascotas\": false\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Guarda los cambios', function () {",
+            "    const p = pm.response.json();",
+            "    pm.expect(p.telefono).to.eql('3001112233');",
+            "    pm.expect(p.placaVehiculo).to.eql('XYZ987');",
+            "    pm.expect(p.tieneMascotas).to.be.false;",
+            "});",
+            "pm.test('PUT reemplaza todo: los campos no enviados quedan vacíos', function () {",
+            "    pm.expect(pm.response.json().observaciones).to.be.null;",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Actualizar propietario inexistente (404)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{nodeUrl}}/api/propietarios/{{cedulaInexistente}}",
+            "body": { "mode": "raw", "raw": "{\n  \"tipoResidente\": \"PROPIETARIO\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+          ] } }]
+        },
+        {
+          "name": "Ruta que no existe (404)",
+          "request": { "method": "GET", "url": "{{nodeUrl}}/api/no-existe" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });",
+            "pm.test('Explica la ruta', function () { pm.expect(pm.response.json().detail).to.include('Ruta no encontrada'); });"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "3 - Web Laravel (sesión + consulta cruzada)",
+      "description": "Laravel usa sesión con cookie y token CSRF. Postman guarda las cookies solo: primero se pide el formulario de login para leer el token, luego se inicia sesión y se llama al endpoint JSON que cruza Spring y Node. Si cambiaste la contraseña del usuario de demostración, actualiza la variable adminPassword.",
+      "item": [
+        {
+          "name": "Sin sesión redirige al login",
+          "protocolProfileBehavior": { "followRedirects": false },
+          "request": { "method": "GET", "url": "{{webUrl}}/parqueaderos/api/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 302', function () { pm.response.to.have.status(302); });",
+            "pm.test('Redirige a /login', function () { pm.expect(pm.response.headers.get('Location')).to.include('/login'); });"
+          ] } }]
+        },
+        {
+          "name": "Formulario de login: obtiene el token CSRF (GET /login)",
+          "request": { "method": "GET", "url": "{{webUrl}}/login" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "const token = pm.response.text().match(/name=\"_token\"\\s+value=\"([^\"]+)\"/);",
+            "pm.test('La página trae el token CSRF', function () { pm.expect(token).to.not.be.null; });",
+            "if (token) { pm.collectionVariables.set('csrfToken', token[1]); }"
+          ] } }]
+        },
+        {
+          "name": "Iniciar sesión (POST /login)",
+          "protocolProfileBehavior": { "followRedirects": false },
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "text/html" }],
+            "url": "{{webUrl}}/login",
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "_token", "value": "{{csrfToken}}" },
+                { "key": "email", "value": "{{adminEmail}}" },
+                { "key": "password", "value": "{{adminPassword}}" }
+              ]
+            }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 302', function () { pm.response.to.have.status(302); });",
+            "// Laravel redirige a la página que se intentó abrir sin sesión (o al dashboard); si las credenciales fallan, vuelve a /login.",
+            "pm.test('No vuelve al login (credenciales correctas)', function () { pm.expect(pm.response.headers.get('Location')).to.not.include('/login'); });"
+          ] } }]
+        },
+        {
+          "name": "Dashboard con sesión: renueva el token CSRF (GET /dashboard)",
+          "request": { "method": "GET", "url": "{{webUrl}}/dashboard" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK con sesión', function () { pm.response.to.have.status(200); });",
+            "// Al iniciar sesión Laravel regenera la sesión y el token CSRF: se toma el nuevo del formulario de cerrar sesión.",
+            "const token = pm.response.text().match(/name=\"_token\"\\s+value=\"([^\"]+)\"/);",
+            "pm.test('La página trae el token CSRF nuevo', function () { pm.expect(token).to.not.be.null; });",
+            "if (token) { pm.collectionVariables.set('csrfToken', token[1]); }"
+          ] } }]
+        },
+        {
+          "name": "Consulta cruzada Java + Node (GET /parqueaderos/api/{cedula})",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{webUrl}}/parqueaderos/api/{{cedula}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('Encuentra al residente en las dos APIs', function () {",
+            "    const d = pm.response.json();",
+            "    pm.expect(d.encontradoEnJava).to.be.true;",
+            "    pm.expect(d.encontradoEnNode).to.be.true;",
+            "    pm.expect(d.errorJava).to.be.null;",
+            "    pm.expect(d.errorNode).to.be.null;",
+            "});",
+            "pm.test('Junta los datos de ambas', function () {",
+            "    const d = pm.response.json();",
+            "    pm.expect(d.residente.nombre).to.eql('Residente Postman');",
+            "    pm.expect(d.residente.tieneParqueadero).to.be.true;",
+            "    pm.expect(d.propietario.numeroParqueadero).to.eql('P-902');",
+            "    pm.expect(d.propietario.placaVehiculo).to.eql('XYZ987');",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Consulta cruzada de una cédula inexistente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{webUrl}}/parqueaderos/api/{{cedulaInexistente}}"
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 200 OK', function () { pm.response.to.have.status(200); });",
+            "pm.test('No la encuentra en ninguna API', function () {",
+            "    const d = pm.response.json();",
+            "    pm.expect(d.encontradoEnJava).to.be.false;",
+            "    pm.expect(d.encontradoEnNode).to.be.false;",
+            "});"
+          ] } }]
+        },
+        {
+          "name": "Cerrar sesión (POST /logout)",
+          "protocolProfileBehavior": { "followRedirects": false },
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "text/html" }],
+            "url": "{{webUrl}}/logout",
+            "body": { "mode": "urlencoded", "urlencoded": [{ "key": "_token", "value": "{{csrfToken}}" }] }
+          },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 302', function () { pm.response.to.have.status(302); });",
+            "pm.test('Redirige a /login', function () { pm.expect(pm.response.headers.get('Location')).to.include('/login'); });"
+          ] } }]
+        },
+        {
+          "name": "Tras cerrar sesión vuelve a pedir login",
+          "protocolProfileBehavior": { "followRedirects": false },
+          "request": { "method": "GET", "url": "{{webUrl}}/parqueaderos/api/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 302 a /login', function () {",
+            "    pm.response.to.have.status(302);",
+            "    pm.expect(pm.response.headers.get('Location')).to.include('/login');",
+            "});"
+          ] } }]
+        }
+      ]
+    },
+    {
+      "name": "4 - Limpieza",
+      "item": [
+        {
+          "name": "Eliminar propietario (DELETE /api/propietarios/{cedula})",
+          "request": { "method": "DELETE", "url": "{{nodeUrl}}/api/propietarios/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 204 No Content', function () { pm.response.to.have.status(204); });"
+          ] } }]
+        },
+        {
+          "name": "Eliminar propietario que ya no existe (404)",
+          "request": { "method": "DELETE", "url": "{{nodeUrl}}/api/propietarios/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+          ] } }]
+        },
+        {
+          "name": "Eliminar residente (DELETE /api/residentes/{cedula})",
+          "request": { "method": "DELETE", "url": "{{springUrl}}/api/residentes/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 204 No Content', function () { pm.response.to.have.status(204); });"
+          ] } }]
+        },
+        {
+          "name": "Consultar residente eliminado (404)",
+          "request": { "method": "GET", "url": "{{springUrl}}/api/residentes/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+          ] } }]
+        },
+        {
+          "name": "Eliminar residente que ya no existe (404)",
+          "request": { "method": "DELETE", "url": "{{springUrl}}/api/residentes/{{cedula}}" },
+          "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+            "pm.test('Responde 404 Not Found', function () { pm.response.to.have.status(404); });"
+          ] } }]
+        }
+      ]
+    }
+  ]
+}
